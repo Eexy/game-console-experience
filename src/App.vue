@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ref } from "vue";
-import { fetch } from "@tauri-apps/plugin-http";
+import { invoke } from "@tauri-apps/api/core";
 
 const profileId = ref("");
 
@@ -10,13 +10,24 @@ async function onSubmit() {
     const key = import.meta.env.VITE_STEAM_KEY;
     if (!key) throw new Error("missing steam api key");
 
-    const res = await fetch(
-        `http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=${key}&steamid=${profileId.value}`,
-        { method: "GET" },
-    );
-    const data = await res.json();
-    console.log(data.response);
+    const res: SteamOwnedGameResponse = await invoke("get_steam_owned_games", {
+        profileId: profileId.value,
+        steamKey: key,
+    });
+
+    ownedGames.value = res.games;
+    gameCount.value = res.game_count;
 }
+
+type OwnedGames = { name: string; appid: number };
+
+type SteamOwnedGameResponse = {
+    game_count: number;
+    games: OwnedGames[];
+};
+
+const ownedGames = ref<OwnedGames[]>([]);
+const gameCount = ref(0);
 </script>
 
 <template>
@@ -25,7 +36,14 @@ async function onSubmit() {
             <Input v-model="profileId"></Input>
             <Button @click="onSubmit">submit</Button>
         </div>
-        <div></div>
+        <div>
+            <p>count : {{ gameCount }}</p>
+            <ul>
+                <li v-for="game in ownedGames" :key="game.appid">
+                    {{ game.name }}
+                </li>
+            </ul>
+        </div>
     </div>
 </template>
 
