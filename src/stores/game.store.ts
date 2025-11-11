@@ -4,7 +4,14 @@ import { ref } from "vue";
 
 export const useGameStore = defineStore("game", () => {
     const games = ref<SteamOwnedGame[]>([]);
-    const currentGame = ref<SteamOwnedGame | null>(null);
 
-    return { games, currentGame };
+    function getGameById(id: number) {
+        const game = games.value.find((g) => g.appid === id);
+
+        if (!game) return null;
+
+        return game;
+    }
+
+    return { games, getGameById };
 });
