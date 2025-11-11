@@ -1,12 +1,15 @@
 <template>
-    <div class="flex">
-        <Sidebar></Sidebar>
-        <main class="flex-1"></main>
-    </div>
+    <SidebarProvider>
+        <AppSidebar></AppSidebar>
+        <main>
+            <SidebarTrigger></SidebarTrigger>
+        </main>
+    </SidebarProvider>
 </template>
 
 <script setup lang="ts">
-import Sidebar from "./components/ui/Sidebar.vue";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import AppSidebar from "@/components/ui/AppSidebar.vue";
 </script>
 
 <style scoped></style>
