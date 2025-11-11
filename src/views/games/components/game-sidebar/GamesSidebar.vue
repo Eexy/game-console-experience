@@ -5,7 +5,7 @@
         </SidebarHeader>
         <SidebarContent class="overflow-hidden">
             <ScrollArea class="min-h-0">
-                <GameList></GameList>
+                <GamesList></GamesList>
                 <ScrollBar />
             </ScrollArea>
         </SidebarContent>
@@ -20,7 +20,7 @@ import {
     SidebarContent,
 } from "@/components/ui/sidebar";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import GameList from "@/components/ui/GameList.vue";
+import GamesList from "@/views/games/components/game-list/GamesList.vue";
 </script>
 
 <style scoped></style>

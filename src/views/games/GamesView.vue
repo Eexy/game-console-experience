@@ -1,6 +1,6 @@
 <template>
     <SidebarProvider>
-        <AppSidebar></AppSidebar>
+        <GamesSidebar />
         <main>
             <SidebarTrigger></SidebarTrigger>
             {{ currentGame }}
@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import AppSidebar from "@/components/ui/AppSidebar.vue";
+import GamesSidebar from "@/views/games/components/game-sidebar/GamesSidebar.vue";
 import { useGameStore } from "@/stores/game.store";
 import { storeToRefs } from "pinia";
 
