@@ -8,15 +8,14 @@
 <script setup lang="ts">
 import { SteamOwnedGameResponse } from "@/types/steam/api";
 import { invoke } from "@tauri-apps/api/core";
-import { defineModel } from "vue";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { storeToRefs } from "pinia";
+import { useGameStore } from "@/stores/game.store";
+import { ref } from "vue";
 
-const profileId = defineModel<string>({ required: true });
-
-const emit = defineEmits<{
-    (e: "submit", response: SteamOwnedGameResponse): void;
-}>();
+const profileId = ref("");
+const { games } = storeToRefs(useGameStore());
 
 async function onSubmit() {
     const key = import.meta.env.VITE_STEAM_KEY;
@@ -31,7 +30,7 @@ async function onSubmit() {
             },
         );
 
-        emit("submit", res);
+        games.value = res.games;
     } catch (e) {
         console.error(e);
     }

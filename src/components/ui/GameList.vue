@@ -1,20 +1,16 @@
 <template>
     <ul>
-        <li v-for="game in props.games" :key="game.appid">
+        <li @click="currentGame = game" v-for="game in games" :key="game.appid">
             {{ game.name }}
         </li>
     </ul>
 </template>
 
 <script setup lang="ts">
-import { SteamOwnedGame } from "@/types/steam/games";
+import { useGameStore } from "@/stores/game.store";
+import { storeToRefs } from "pinia";
 
-type Props = {
-    games: SteamOwnedGame[];
-    gameCount: number;
-};
-
-const props = defineProps<Props>();
+const { games, currentGame } = storeToRefs(useGameStore());
 </script>
 
 <style scoped></style>
