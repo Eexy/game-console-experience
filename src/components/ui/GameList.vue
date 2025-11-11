@@ -1,11 +1,9 @@
 <template>
-    <ScrollArea>
-        <ul>
-            <li v-for="game in props.games" :key="game.appid">
-                {{ game.name }}
-            </li>
-        </ul>
-    </ScrollArea>
+    <ul>
+        <li v-for="game in props.games" :key="game.appid">
+            {{ game.name }}
+        </li>
+    </ul>
 </template>
 
 <script setup lang="ts">
