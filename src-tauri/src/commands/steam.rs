@@ -48,10 +48,17 @@ pub struct SteamGameGenre {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum RequiredAge {
+    Number(u16),
+    Text(String),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SteamGameInfo {
     name: String,
     steam_appid: u32,
-    required_age: u32,
+    required_age: RequiredAge,
     is_free: bool,
     about_the_game: String,
     header_image: String,
