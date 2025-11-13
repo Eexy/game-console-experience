@@ -1,6 +1,6 @@
 <template>
     <form @submit.prevent="onSubmit" class="flex gap-2 items-center">
-        <Input v-model="profileId"></Input>
+        <Input placeholder="steam profile id" v-model="profileId"></Input>
         <Button @click="onSubmit" type="submit">submit</Button>
     </form>
 </template>
