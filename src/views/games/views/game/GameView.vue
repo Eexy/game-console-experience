@@ -3,6 +3,7 @@
         <template v-if="gameInfo">
             <GameHero :url="gameInfo.header_image"></GameHero>
             <GameTitle :title="gameInfo.name"></GameTitle>
+            <Button class="self-start">Play</Button>
             <GameDescription
                 :description="gameInfo.about_the_game"
             ></GameDescription>
@@ -11,9 +12,10 @@
 </template>
 
 <script setup lang="ts">
-import GameHero from "./components/GameHero.vue";
-import GameTitle from "./components/GameTitle.vue";
-import GameDescription from "./components/GameDescription.vue";
+import GameHero from "@/views/games/views/game/components/GameHero.vue";
+import GameTitle from "@/views/games/views/game/components/GameTitle.vue";
+import GameDescription from "@/views/games/views/game/components/GameDescription.vue";
+import { Button } from "@/components/ui/button";
 import { useGameStore } from "@/stores/game.store";
 import { computed, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
