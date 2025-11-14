@@ -8,7 +8,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::get_steam_owned_games,
             commands::get_game_info,
-            commands::is_game_installed
+            commands::is_game_installed,
+            commands::launch_game
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
