@@ -1,7 +1,7 @@
 <template>
     <Sidebar>
         <SidebarHeader>
-            <SteamIdForm></SteamIdForm>
+            <SteamIdForm v-if="!profileId"></SteamIdForm>
         </SidebarHeader>
         <SidebarContent class="overflow-hidden">
             <ScrollArea class="min-h-0">
@@ -21,6 +21,9 @@ import {
 } from "@/components/ui/sidebar";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import GamesList from "@/views/games/components/game-list/GamesList.vue";
+import { computed } from "vue";
+
+const profileId = computed(() => import.meta.env.VITE_STEAM_PROFILE_ID);
 </script>
 
 <style scoped></style>
