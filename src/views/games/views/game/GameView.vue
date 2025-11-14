@@ -3,7 +3,18 @@
         <template v-if="gameInfo">
             <GameHero :url="gameInfo.header_image"></GameHero>
             <GameTitle :title="gameInfo.name"></GameTitle>
-            <Button class="self-start">Play</Button>
+            <span
+                v-if="!isGameInstalled"
+                class="border bg-red-700/10 p-2 border-red-700 text-red-700"
+            >
+                you need to install this game throught steam to play it</span
+            >
+            <span
+                v-else
+                class="border bg-green-700/10 p-2 border-green-700 text-green-700"
+            >
+                game is installed
+            </span>
             <GameDescription
                 :description="gameInfo.about_the_game"
             ></GameDescription>
@@ -15,7 +26,6 @@
 import GameHero from "@/views/games/views/game/components/GameHero.vue";
 import GameTitle from "@/views/games/views/game/components/GameTitle.vue";
 import GameDescription from "@/views/games/views/game/components/GameDescription.vue";
-import { Button } from "@/components/ui/button";
 import { useGameStore } from "@/stores/game.store";
 import { computed, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
@@ -33,10 +43,16 @@ const game = computed(() => {
 });
 
 const gameInfo = ref<SteamGameInfo | null>(null);
+const isGameInstalled = ref(false);
 
 watchEffect(async () => {
     if (game.value) {
         gameInfo.value = await getGameInfo(game.value.appid);
+        if (gameInfo.value) {
+            isGameInstalled.value = await getIsGameInstalled(
+                gameInfo.value.steam_appid,
+            );
+        }
     }
 });
 
@@ -52,6 +68,19 @@ async function getGameInfo(id: number) {
     } catch (e) {
         console.error(e);
         return null;
+    }
+}
+
+async function getIsGameInstalled(gameId: number) {
+    try {
+        const res: boolean = await invoke("is_game_installed", {
+            gameId,
+        });
+
+        return res;
+    } catch (e) {
+        console.error(e);
+        return false;
     }
 }
 </script>
