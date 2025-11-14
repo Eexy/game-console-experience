@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::Path};
 
 use serde::{Deserialize, Serialize};
 use tauri_plugin_http::reqwest;
@@ -95,4 +95,15 @@ pub async fn get_game_info(game_id: u32) -> Result<HashMap<String, GameInfoData>
         serde_json::from_str(&body).map_err(|e| e.to_string())?;
 
     Ok(api_response.games)
+}
+
+#[tauri::command]
+pub async fn is_game_installed(game_id: u32) -> bool {
+    let file_path = format!(
+        "C:\\Program Files (x86)\\Steam\\steamapps\\appmanifest_{}.acf",
+        game_id,
+    );
+    let path = Path::new(&file_path);
+
+    path.exists()
 }
