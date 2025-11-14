@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col gap-2">
+    <div class="flex flex-col gap-2 p-2">
         <template v-if="gameInfo">
             <GameHero :url="gameInfo.header_image"></GameHero>
             <GameTitle :title="gameInfo.name"></GameTitle>
