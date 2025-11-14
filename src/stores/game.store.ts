@@ -1,6 +1,6 @@
 import { SteamOwnedGame } from "@/types/steam/games";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 export const useGameStore = defineStore("game", () => {
     const games = ref<SteamOwnedGame[]>([]);
@@ -13,5 +13,17 @@ export const useGameStore = defineStore("game", () => {
         return game;
     }
 
-    return { games, getGameById };
+    const gameSearch = ref("");
+
+    const filteredGames = computed(() =>
+        gameSearch.value.length
+            ? games.value.filter((game) =>
+                  game.name
+                      .toLowerCase()
+                      .includes(gameSearch.value.toLowerCase()),
+              )
+            : games.value,
+    );
+
+    return { games, filteredGames, gameSearch, getGameById };
 });

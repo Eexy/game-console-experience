@@ -1,6 +1,6 @@
 <template>
     <ul>
-        <li v-for="game in games" :key="game.appid">
+        <li v-for="game in filteredGames" :key="game.appid">
             <RouterLink :to="`/games/${game.appid}`">
                 {{ game.name }}
             </RouterLink>
@@ -13,7 +13,7 @@ import { useGameStore } from "@/stores/game.store";
 import { RouterLink } from "vue-router";
 import { storeToRefs } from "pinia";
 
-const { games } = storeToRefs(useGameStore());
+const { filteredGames } = storeToRefs(useGameStore());
 </script>
 
 <style scoped></style>
