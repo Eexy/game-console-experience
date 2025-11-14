@@ -10,6 +10,7 @@
                 you need to install this game throught steam to play it</span
             >
             <Button
+                class="self-start"
                 v-if="isGameInstalled && gameInfo"
                 @click="onPlay(gameInfo.steam_appid)"
                 >play</Button
