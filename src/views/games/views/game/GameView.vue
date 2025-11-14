@@ -9,12 +9,11 @@
             >
                 you need to install this game throught steam to play it</span
             >
-            <span
-                v-else
-                class="border bg-green-700/10 p-2 border-green-700 text-green-700"
+            <Button
+                v-if="isGameInstalled && gameInfo"
+                @click="onPlay(gameInfo.steam_appid)"
+                >play</Button
             >
-                game is installed
-            </span>
             <GameDescription
                 :description="gameInfo.about_the_game"
             ></GameDescription>
@@ -23,6 +22,7 @@
 </template>
 
 <script setup lang="ts">
+import Button from "@/components/ui/button/Button.vue";
 import GameHero from "@/views/games/views/game/components/GameHero.vue";
 import GameTitle from "@/views/games/views/game/components/GameTitle.vue";
 import GameDescription from "@/views/games/views/game/components/GameDescription.vue";
@@ -81,6 +81,18 @@ async function getIsGameInstalled(gameId: number) {
     } catch (e) {
         console.error(e);
         return false;
+    }
+}
+
+async function onPlay(gameId: number) {
+    try {
+        const res: boolean = await invoke("launch_game", {
+            gameId,
+        });
+
+        if (!res) throw new Error("unable to launch game");
+    } catch (e) {
+        console.error(e);
     }
 }
 </script>
