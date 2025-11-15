@@ -10,6 +10,7 @@ pub fn run() {
             commands::get_game_info,
             commands::is_game_installed,
             commands::launch_game,
+            commands::install_game,
             commands::filter_games
         ])
         .run(tauri::generate_context!())

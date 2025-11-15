@@ -3,11 +3,11 @@
         <template v-if="gameInfo">
             <GameHero :url="gameInfo.header_image"></GameHero>
             <GameTitle :title="gameInfo.name"></GameTitle>
-            <span
-                v-if="!isGameInstalled"
-                class="border bg-red-700/10 p-2 border-red-700 text-red-700"
-            >
-                you need to install this game throught steam to play it</span
+            <Button
+                class="self-start"
+                v-if="!isGameInstalled && gameInfo"
+                @click="onInstall(gameInfo.steam_appid)"
+                >install</Button
             >
             <Button
                 class="self-start"
@@ -92,6 +92,18 @@ async function onPlay(gameId: number) {
         });
 
         if (!res) throw new Error("unable to launch game");
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function onInstall(gameId: number) {
+    try {
+        const res: boolean = await invoke("install_game", {
+            gameId,
+        });
+
+        if (!res) throw new Error("unable to install game");
     } catch (e) {
         console.error(e);
     }

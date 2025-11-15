@@ -116,6 +116,18 @@ pub async fn is_game_installed(game_id: u32) -> bool {
 
 #[tauri::command]
 pub async fn launch_game(app: tauri::AppHandle, game_id: u32) -> Result<bool, String> {
+    let steam_url = format!("steam://install/{}/", game_id,);
+
+    let res = app.opener().open_url(steam_url, None::<&str>);
+
+    match res {
+        Ok(_) => Ok(true),
+        Err(_) => Err("unable to launch_game".to_string()),
+    }
+}
+
+#[tauri::command]
+pub async fn install_game(app: tauri::AppHandle, game_id: u32) -> Result<bool, String> {
     let steam_url = format!("steam://run/{}/", game_id,);
 
     let res = app.opener().open_url(steam_url, None::<&str>);
