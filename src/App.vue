@@ -27,7 +27,6 @@ onMounted(async () => {
                 steamKey: key,
             },
         );
-
         games.value = res.games;
     } catch (e) {
         console.error(e);
