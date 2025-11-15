@@ -125,8 +125,11 @@ pub async fn launch_game(app: tauri::AppHandle, game_id: u32) -> Result<bool, St
 
 #[tauri::command]
 pub fn filter_games(games: Vec<SteamOwnedGame>, search: String) -> Vec<SteamOwnedGame> {
-    games
+    let mut filtered: Vec<SteamOwnedGame> = games
         .into_iter()
         .filter(|game| game.name.to_lowercase().contains(&search.to_lowercase()))
-        .collect()
+        .collect();
+
+    filtered.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    filtered
 }
