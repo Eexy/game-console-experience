@@ -39,7 +39,10 @@ pub async fn get_steam_owned_games(
 
     let body = res.text().await.map_err(|e| e.to_string())?;
 
-    let api_response: SteamApiResponse = serde_json::from_str(&body).map_err(|e| e.to_string())?;
+    let mut api_response: SteamApiResponse =
+        serde_json::from_str(&body).map_err(|e| e.to_string())?;
+
+    api_response.response.games = sort_game(api_response.response.games);
 
     Ok(api_response.response)
 }
@@ -125,11 +128,15 @@ pub async fn launch_game(app: tauri::AppHandle, game_id: u32) -> Result<bool, St
 
 #[tauri::command]
 pub fn filter_games(games: Vec<SteamOwnedGame>, search: String) -> Vec<SteamOwnedGame> {
-    let mut filtered: Vec<SteamOwnedGame> = games
+    let filtered: Vec<SteamOwnedGame> = games
         .into_iter()
         .filter(|game| game.name.to_lowercase().contains(&search.to_lowercase()))
         .collect();
 
-    filtered.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
-    filtered
+    sort_game(filtered)
+}
+
+fn sort_game(mut games: Vec<SteamOwnedGame>) -> Vec<SteamOwnedGame> {
+    games.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    games
 }
