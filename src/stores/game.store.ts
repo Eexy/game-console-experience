@@ -1,7 +1,7 @@
 import { SteamOwnedGame } from "@/types/steam/games";
 import { invoke } from "@tauri-apps/api/core";
 import { defineStore } from "pinia";
-import { computed, ref, watchEffect } from "vue";
+import { ref, watchEffect } from "vue";
 
 export const useGameStore = defineStore("game", () => {
     const games = ref<SteamOwnedGame[]>([]);
