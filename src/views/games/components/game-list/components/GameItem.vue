@@ -27,7 +27,7 @@ const props = defineProps<Props>();
 
 const iconUrl = computed(
     () =>
-        ` http://media.steampowered.com/steamcommunity/public/images/apps/${props.game.appid}/${props.game.img_icon_url}.jpg`,
+        `http://media.steampowered.com/steamcommunity/public/images/apps/${props.game.appid}/${props.game.img_icon_url}.jpg`,
 );
 </script>
 
