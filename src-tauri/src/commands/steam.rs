@@ -122,3 +122,11 @@ pub async fn launch_game(app: tauri::AppHandle, game_id: u32) -> Result<bool, St
         Err(_) => Err("unable to launch_game".to_string()),
     }
 }
+
+#[tauri::command]
+pub fn filter_games(games: Vec<SteamOwnedGame>, search: String) -> Vec<SteamOwnedGame> {
+    games
+        .into_iter()
+        .filter(|game| game.name.to_lowercase().contains(&search.to_lowercase()))
+        .collect()
+}

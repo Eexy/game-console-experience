@@ -1,6 +1,7 @@
 import { SteamOwnedGame } from "@/types/steam/games";
+import { invoke } from "@tauri-apps/api/core";
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { computed, ref, watchEffect } from "vue";
 
 export const useGameStore = defineStore("game", () => {
     const games = ref<SteamOwnedGame[]>([]);
@@ -15,15 +16,19 @@ export const useGameStore = defineStore("game", () => {
 
     const gameSearch = ref("");
 
-    const filteredGames = computed(() =>
-        gameSearch.value.length
-            ? games.value.filter((game) =>
-                  game.name
-                      .toLowerCase()
-                      .includes(gameSearch.value.toLowerCase()),
-              )
-            : games.value,
-    );
+    const filteredGames = ref(games.value);
+
+    watchEffect(async () => {
+        try {
+            const res: SteamOwnedGame[] = await invoke("filter_games", {
+                games: games.value,
+                search: gameSearch.value,
+            });
+            filteredGames.value = res;
+        } catch (e) {
+            console.error(e);
+        }
+    });
 
     return { games, filteredGames, gameSearch, getGameById };
 });

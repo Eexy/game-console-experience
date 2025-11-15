@@ -9,7 +9,8 @@ pub fn run() {
             commands::get_steam_owned_games,
             commands::get_game_info,
             commands::is_game_installed,
-            commands::launch_game
+            commands::launch_game,
+            commands::filter_games
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

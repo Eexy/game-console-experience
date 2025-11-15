@@ -1,7 +1,10 @@
 export type SteamOwnedGame = {
     name: string;
     appid: number;
-    img_icon_url: string;
+    img_icon_url: string | null;
+    img_logo_url: string | null;
+    playtime_2weeks: number;
+    playtime_forever: number;
 };
 
 export type SteamGameGenre = {
