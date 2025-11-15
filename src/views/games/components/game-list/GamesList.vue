@@ -1,16 +1,14 @@
 <template>
-    <ul>
-        <li v-for="game in filteredGames" :key="game.appid">
-            <RouterLink :to="`/games/${game.appid}`">
-                {{ game.name }}
-            </RouterLink>
+    <ul class="px-2">
+        <li v-for="game in filteredGames" :key="game.appid" class="">
+            <GameItem :game="game"></GameItem>
         </li>
     </ul>
 </template>
 
 <script setup lang="ts">
 import { useGameStore } from "@/stores/game.store";
-import { RouterLink } from "vue-router";
+import GameItem from "@/views/games/components/game-list/components/GameItem.vue";
 import { storeToRefs } from "pinia";
 
 const { filteredGames } = storeToRefs(useGameStore());

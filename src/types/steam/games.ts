@@ -1,4 +1,8 @@
-export type SteamOwnedGame = { name: string; appid: number };
+export type SteamOwnedGame = {
+    name: string;
+    appid: number;
+    img_icon_url: string;
+};
 
 export type SteamGameGenre = {
     id: string;

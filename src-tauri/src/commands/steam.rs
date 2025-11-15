@@ -10,6 +10,8 @@ pub struct SteamOwnedGame {
     name: String,
     playtime_2weeks: Option<u32>,
     playtime_forever: u32,
+    img_icon_url: Option<String>,
+    img_logo_url: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
