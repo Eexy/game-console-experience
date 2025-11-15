@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import { SteamOwnedGame } from "@/types/steam/games";
-import { computed, watch } from "vue";
+import { computed } from "vue";
 import { useRoute } from "vue-router";
 
 type Props = {
