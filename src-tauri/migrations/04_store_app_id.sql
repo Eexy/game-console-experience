@@ -1,0 +1,1 @@
+alter table games add store_app_id integer;
