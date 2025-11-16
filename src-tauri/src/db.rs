@@ -20,6 +20,8 @@ pub async fn create_db_pool(app_handle: &tauri::AppHandle) -> Result<SqlitePool,
 
     let pool = SqlitePool::connect_with(connection_options).await?;
 
+    sqlx::migrate!("./migrations").run(&pool).await?;
+
     Ok(pool)
 }
 
