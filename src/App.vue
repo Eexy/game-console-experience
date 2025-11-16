@@ -6,9 +6,9 @@
 import { invoke } from "@tauri-apps/api/core";
 import { onMounted } from "vue";
 import { RouterView } from "vue-router";
-import { SteamOwnedGameResponse } from "./types/steam/api";
 import { storeToRefs } from "pinia";
 import { useGameStore } from "./stores/game.store";
+import { GameItem } from "./types/games";
 
 const { games } = storeToRefs(useGameStore());
 
@@ -20,16 +20,14 @@ onMounted(async () => {
     if (!profileId) throw new Error("missing steam profileId");
 
     try {
-        const res: SteamOwnedGameResponse = await invoke(
-            "get_steam_owned_games",
-            {
-                profileId: profileId,
-                steamKey: key,
-            },
-        );
-        games.value = res.games;
+        const res: GameItem[] = await invoke("get_games", {
+            profileId: profileId,
+            steamKey: key,
+        });
+        console.log(res);
+        games.value = res;
     } catch (e) {
-        console.error(e);
+        console.log(e);
     }
 });
 </script>

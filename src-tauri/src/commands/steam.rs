@@ -3,6 +3,7 @@ use std::path::PathBuf;
 use std::{collections::HashMap, path::Path};
 
 use serde::{Deserialize, Serialize};
+use sqlx::{Pool, Sqlite};
 use tauri_plugin_http::reqwest;
 use tauri_plugin_opener::OpenerExt;
 use windows_registry::LOCAL_MACHINE;
@@ -19,7 +20,6 @@ pub struct SteamOwnedGame {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SteamGamesData {
-    game_count: u32,
     games: Vec<SteamOwnedGame>,
 }
 
@@ -28,11 +28,11 @@ pub struct SteamApiResponse {
     response: SteamGamesData,
 }
 
-#[tauri::command]
-pub async fn get_steam_owned_games(
+pub async fn get_steam_games(
+    pool: &Pool<Sqlite>,
     profile_id: String,
     steam_key: String,
-) -> Result<SteamGamesData, String> {
+) -> Result<(), String> {
     let url = format!(
         "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={}&steamid={}&include_appinfo=1&format=json",
         steam_key, profile_id
@@ -42,12 +42,37 @@ pub async fn get_steam_owned_games(
 
     let body = res.text().await.map_err(|e| e.to_string())?;
 
-    let mut api_response: SteamApiResponse =
-        serde_json::from_str(&body).map_err(|e| e.to_string())?;
+    let api_response: SteamApiResponse = serde_json::from_str(&body).map_err(|e| e.to_string())?;
 
-    api_response.response.games = sort_game(api_response.response.games);
+    if api_response.response.games.is_empty() {
+        return Ok(());
+    }
 
-    Ok(api_response.response)
+    let placeholders = api_response
+        .response
+        .games
+        .iter()
+        .map(|_| "(?, ?, ?)")
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    let query_str = format!(
+        "insert into games (title, logo_url, store_app_id) values {}",
+        placeholders
+    );
+
+    let mut query = sqlx::query(&query_str);
+
+    for game in &api_response.response.games {
+        query = query
+            .bind(&game.name)
+            .bind(&game.img_icon_url)
+            .bind(game.appid);
+    }
+
+    query.execute(pool).await.map_err(|e| e.to_string())?;
+
+    Ok(())
 }
 
 #[derive(Debug, Serialize, Deserialize)]
