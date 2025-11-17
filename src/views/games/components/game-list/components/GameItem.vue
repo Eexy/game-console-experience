@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import { GameItem } from "@/types/games";
-import { computed, onMounted } from "vue";
+import { computed } from "vue";
 import { useRoute } from "vue-router";
 
 type Props = {
@@ -20,10 +20,6 @@ type Props = {
 };
 
 const route = useRoute();
-
-onMounted(() => {
-    console.log(props.game);
-});
 
 const isActive = computed(() => route.params.id === String(props.game.id));
 

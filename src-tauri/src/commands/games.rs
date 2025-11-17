@@ -7,6 +7,7 @@ use crate::{commands::get_steam_games, db::DbState};
 pub struct Game {
     id: u16,
     title: String,
+    store_app_id: u32,
     logo_url: Option<String>,
 }
 
@@ -14,9 +15,9 @@ pub struct Game {
 pub async fn get_games(state: State<'_, DbState>) -> Result<Vec<Game>, String> {
     let games = sqlx::query_as::<_, Game>(
         "
- select id, title, logo_url
- from games
-",
+         select id, title, logo_url, store_app_id
+         from games
+        ",
     )
     .fetch_all(&state.pool)
     .await
