@@ -21,26 +21,23 @@ impl SteamState {
 
         let content = fs::read_to_string(cwd).expect("unable to read env file");
 
-        let mut state = SteamState {
-            steam_key: "".to_string(),
-            profile_id: "".to_string(),
-        };
+        let mut profile_id = None;
+        let mut steam_key = None;
 
         for line in content.lines() {
-            if line.contains("PROFILE_ID") {
-                let profile_id = line.split("=").last().expect("unable to read profile id");
-                state.profile_id = profile_id.to_string();
-            } else if line.contains("STEAM_KEY") {
-                let steam_key = line.split("=").last().expect("unable to read profile id");
-                state.steam_key = steam_key.to_string();
+            if let Some((key, value)) = line.split_once("=") {
+                match key.trim() {
+                    "STEAM_KEY" => steam_key = Some(value.trim().to_string()),
+                    "PROFILE_ID" => profile_id = Some(value.trim().to_string()),
+                    _ => {}
+                }
             }
         }
 
-        if state.steam_key.is_empty() || state.profile_id.is_empty() {
-            panic!("unable to read steam env variables");
+        SteamState {
+            steam_key: steam_key.expect("unable to read steam_key from env"),
+            profile_id: profile_id.expect("unable to read profile_id from env"),
         }
-
-        state
     }
 }
 
