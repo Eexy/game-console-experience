@@ -24,10 +24,23 @@ onMounted(async () => {
             profileId: profileId,
             steamKey: key,
         });
-        console.log(res);
         games.value = res;
     } catch (e) {
         console.log(e);
+    }
+});
+
+window.addEventListener("load", async () => {
+    const key = import.meta.env.VITE_STEAM_KEY;
+    const profileId = import.meta.env.VITE_STEAM_PROFILE_ID;
+
+    try {
+        await invoke("refresh_games", {
+            profileId: profileId,
+            steamKey: key,
+        });
+    } catch (e) {
+        console.error(e);
     }
 });
 </script>

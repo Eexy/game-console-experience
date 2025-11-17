@@ -23,7 +23,10 @@ pub fn run() {
         })
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![commands::get_games,])
+        .invoke_handler(tauri::generate_handler![
+            commands::get_games,
+            commands::refresh_games
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

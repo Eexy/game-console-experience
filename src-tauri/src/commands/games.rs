@@ -1,4 +1,5 @@
 use serde::Serialize;
+use sqlx::{Pool, Sqlite};
 use tauri::State;
 
 use crate::{commands::get_steam_games, db::DbState};
@@ -32,7 +33,18 @@ pub async fn refresh_games(
     profile_id: String,
     steam_key: String,
 ) -> Result<(), String> {
+    delete_games(&state.pool).await.map_err(|e| e.to_string())?;
+
     get_steam_games(&state.pool, profile_id, steam_key)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+async fn delete_games(pool: &Pool<Sqlite>) -> Result<(), String> {
+    sqlx::query("delete from games")
+        .execute(pool)
         .await
         .map_err(|e| e.to_string())?;
 
