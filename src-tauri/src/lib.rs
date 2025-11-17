@@ -1,6 +1,6 @@
 use tauri::Manager;
 
-use crate::db::DbState;
+use crate::{commands::SteamState, db::DbState};
 
 mod commands;
 mod db;
@@ -18,6 +18,8 @@ pub fn run() {
 
                 app.manage(DbState { pool: pool });
             });
+
+            app.manage(SteamState::new());
 
             Ok(())
         })

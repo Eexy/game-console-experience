@@ -12,27 +12,20 @@ import { GameItem } from "./types/games";
 const { games } = storeToRefs(useGameStore());
 
 window.addEventListener("load", async () => {
-    const key = import.meta.env.VITE_STEAM_KEY;
-    const profileId = import.meta.env.VITE_STEAM_PROFILE_ID;
-
     const isRefresh = sessionStorage.getItem("appLoaded");
 
     if (!isRefresh || !Boolean(isRefresh)) {
         try {
-            const res: GameItem[] = await invoke("get_games", {
-                profileId: profileId,
-                steamKey: key,
-            });
+            const res: GameItem[] = await invoke("get_games");
             games.value = res;
         } catch (e) {
             console.log(e);
         }
     } else {
         try {
-            await invoke("refresh_games", {
-                profileId: profileId,
-                steamKey: key,
-            });
+            await invoke("refresh_games");
+            const res: GameItem[] = await invoke("get_games");
+            games.value = res;
         } catch (e) {
             console.error(e);
         }

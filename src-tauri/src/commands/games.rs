@@ -2,7 +2,10 @@ use serde::Serialize;
 use sqlx::{Pool, Sqlite};
 use tauri::State;
 
-use crate::{commands::get_steam_games, db::DbState};
+use crate::{
+    commands::{get_steam_games, SteamState},
+    db::DbState,
+};
 
 #[derive(sqlx::FromRow, Serialize)]
 pub struct Game {
@@ -13,14 +16,14 @@ pub struct Game {
 }
 
 #[tauri::command]
-pub async fn get_games(state: State<'_, DbState>) -> Result<Vec<Game>, String> {
+pub async fn get_games(db_state: State<'_, DbState>) -> Result<Vec<Game>, String> {
     let games = sqlx::query_as::<_, Game>(
         "
          select id, title, logo_url, store_app_id
          from games
         ",
     )
-    .fetch_all(&state.pool)
+    .fetch_all(&db_state.pool)
     .await
     .map_err(|e| e.to_string())?;
 
@@ -30,14 +33,17 @@ pub async fn get_games(state: State<'_, DbState>) -> Result<Vec<Game>, String> {
 #[tauri::command]
 pub async fn refresh_games(
     state: State<'_, DbState>,
-    profile_id: String,
-    steam_key: String,
+    steam_state: State<'_, SteamState>,
 ) -> Result<(), String> {
     delete_games(&state.pool).await.map_err(|e| e.to_string())?;
 
-    get_steam_games(&state.pool, profile_id, steam_key)
-        .await
-        .map_err(|e| e.to_string())?;
+    get_steam_games(
+        &state.pool,
+        steam_state.profile_id.clone(),
+        steam_state.steam_key.clone(),
+    )
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(())
 }

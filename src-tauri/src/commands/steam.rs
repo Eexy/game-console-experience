@@ -1,12 +1,48 @@
-#[cfg(target_os = "windows")]
 use std::path::PathBuf;
-use std::{collections::HashMap, path::Path};
+use std::{collections::HashMap, fs, path::Path};
 
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Sqlite};
 use tauri_plugin_http::reqwest;
 use tauri_plugin_opener::OpenerExt;
 use windows_registry::LOCAL_MACHINE;
+
+#[derive(Debug)]
+pub struct SteamState {
+    pub steam_key: String,
+    pub profile_id: String,
+}
+
+impl SteamState {
+    pub fn new() -> Self {
+        let cwd = std::env::current_dir()
+            .expect("unable to get current working directory")
+            .join(".env");
+
+        let content = fs::read_to_string(cwd).expect("unable to read env file");
+
+        let mut state = SteamState {
+            steam_key: "".to_string(),
+            profile_id: "".to_string(),
+        };
+
+        for line in content.lines() {
+            if line.contains("PROFILE_ID") {
+                let profile_id = line.split("=").last().expect("unable to read profile id");
+                state.profile_id = profile_id.to_string();
+            } else if line.contains("STEAM_KEY") {
+                let steam_key = line.split("=").last().expect("unable to read profile id");
+                state.steam_key = steam_key.to_string();
+            }
+        }
+
+        if state.steam_key.is_empty() || state.profile_id.is_empty() {
+            panic!("unable to read steam env variables");
+        }
+
+        state
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SteamOwnedGame {
