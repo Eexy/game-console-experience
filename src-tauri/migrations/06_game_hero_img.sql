@@ -1,0 +1,1 @@
+alter table games add column img_hero text;
