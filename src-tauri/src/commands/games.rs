@@ -21,6 +21,7 @@ pub async fn get_games(db_state: State<'_, DbState>) -> Result<Vec<Game>, String
         "
          select id, title, logo_url, store_app_id
          from games
+         order by title
         ",
     )
     .fetch_all(&db_state.pool)
