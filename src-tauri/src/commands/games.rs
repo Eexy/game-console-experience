@@ -72,6 +72,24 @@ pub async fn refresh_games(
     Ok(())
 }
 
+#[tauri::command]
+pub async fn get_game_by_id(state: State<'_, DbState>, id: u32) -> Result<Game, String> {
+    let game = sqlx::query_as::<_, Game>(
+        "
+         select id, title, logo_url, store_app_id
+         from games
+         where id = ?
+         order by title
+        ",
+    )
+    .bind(id)
+    .fetch_one(&state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok(game)
+}
+
 async fn delete_games(pool: &Pool<Sqlite>) -> Result<(), String> {
     sqlx::query("delete from games")
         .execute(pool)

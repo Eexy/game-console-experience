@@ -47,7 +47,9 @@ pub struct SteamOwnedGame {
     name: String,
     playtime_2weeks: Option<u32>,
     playtime_forever: u32,
+    description: Option<String>,
     img_icon_url: Option<String>,
+    img_hero: Option<String>,
     img_logo_url: Option<String>,
 }
 
@@ -81,25 +83,60 @@ pub async fn get_steam_games(
         return Ok(());
     }
 
-    let placeholders = api_response
+    let tasks: Vec<_> = api_response
         .response
         .games
+        .into_iter()
+        .map(|mut item| {
+            tauri::async_runtime::spawn(async move {
+                let res = get_game_info(item.appid).await.map_err(|e| e.to_string())?;
+                item.img_hero = Some(res.header_image);
+                item.description = Some(res.about_the_game);
+                Ok::<_, String>(item)
+            })
+        })
+        .collect();
+
+    let results = futures::future::join_all(tasks).await;
+
+    let games: Vec<_> = results
+        .into_iter()
+        .filter_map(|item| match item {
+            Ok(Ok(game)) => Some(game),
+            Ok(Err(e)) => {
+                eprintln!("Error fetching game info: {}", e);
+                None
+            }
+            Err(e) => {
+                eprintln!("Task join error: {}", e);
+                None
+            }
+        })
+        .collect();
+
+    if games.is_empty() {
+        return Ok(());
+    }
+
+    let placeholders = games
         .iter()
-        .map(|_| "(?, ?, ?)")
+        .map(|_| "(?, ?, ?, ?, ?)")
         .collect::<Vec<_>>()
         .join(", ");
 
     let query_str = format!(
-        "insert into games (title, logo_url, store_app_id) values {}",
+        "insert into games (title, logo_url, description, img_hero, store_app_id) values {}",
         placeholders
     );
 
     let mut query = sqlx::query(&query_str);
 
-    for game in &api_response.response.games {
+    for game in &games {
         query = query
             .bind(&game.name)
             .bind(&game.img_icon_url)
+            .bind(&game.description)
+            .bind(&game.img_hero)
             .bind(game.appid);
     }
 
@@ -145,8 +182,7 @@ pub struct SteamGameInfoResponse {
     pub games: HashMap<String, GameInfoData>,
 }
 
-#[tauri::command]
-pub async fn get_game_info(game_id: u32) -> Result<HashMap<String, GameInfoData>, String> {
+pub async fn get_game_info(game_id: u32) -> Result<SteamGameInfo, String> {
     let url = format!(
         "https://store.steampowered.com/api/appdetails?appids={}",
         game_id
@@ -156,10 +192,19 @@ pub async fn get_game_info(game_id: u32) -> Result<HashMap<String, GameInfoData>
 
     let body = res.text().await.map_err(|e| e.to_string())?;
 
-    let api_response: SteamGameInfoResponse =
+    let mut api_response: SteamGameInfoResponse =
         serde_json::from_str(&body).map_err(|e| e.to_string())?;
 
-    Ok(api_response.games)
+    match api_response.games.remove(&game_id.to_string()) {
+        Some(info) => {
+            if info.success {
+                Ok(info.data)
+            } else {
+                Err("unable to get game info".to_string())
+            }
+        }
+        None => Err("unable to get game info".to_string()),
+    }
 }
 
 #[tauri::command]
