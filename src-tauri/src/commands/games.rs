@@ -1,5 +1,5 @@
 use serde::Serialize;
-use sqlx::{Pool, Sqlite};
+use sqlx::{Execute, Pool, Sqlite};
 use tauri::State;
 
 use crate::{
@@ -24,6 +24,29 @@ pub async fn get_games(db_state: State<'_, DbState>) -> Result<Vec<Game>, String
          order by title
         ",
     )
+    .fetch_all(&db_state.pool)
+    .await
+    .map_err(|e| e.to_string())?;
+
+    Ok(games)
+}
+
+#[tauri::command]
+pub async fn filter_games_by_title(
+    db_state: State<'_, DbState>,
+    title: String,
+) -> Result<Vec<Game>, String> {
+    let search_pattern = title.to_lowercase();
+
+    let games = sqlx::query_as::<_, Game>(
+        "
+         select id, title, logo_url, store_app_id
+         from games
+         where lower(title) like '%' || ? || '%'
+         order by title
+        ",
+    )
+    .bind(search_pattern)
     .fetch_all(&db_state.pool)
     .await
     .map_err(|e| e.to_string())?;

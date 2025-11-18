@@ -27,6 +27,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             commands::get_games,
+            commands::filter_games_by_title,
             commands::refresh_games
         ])
         .run(tauri::generate_context!())
