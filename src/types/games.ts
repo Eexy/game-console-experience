@@ -3,4 +3,5 @@ export type GameItem = {
     title: string;
     store_app_id: number;
     logo_url: string | null;
+    description?: string;
 };

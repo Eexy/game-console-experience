@@ -1,9 +1,10 @@
+use futures::TryFutureExt;
 use serde::Serialize;
-use sqlx::{Execute, Pool, Sqlite};
+use sqlx::{Pool, Sqlite};
 use tauri::State;
 
 use crate::{
-    commands::{get_steam_games, SteamState},
+    commands::{get_game_info, get_steam_games, SteamState},
     db::DbState,
 };
 
@@ -13,13 +14,14 @@ pub struct Game {
     title: String,
     store_app_id: u32,
     logo_url: Option<String>,
+    description: Option<String>,
 }
 
 #[tauri::command]
 pub async fn get_games(db_state: State<'_, DbState>) -> Result<Vec<Game>, String> {
     let games = sqlx::query_as::<_, Game>(
         "
-         select id, title, logo_url, store_app_id
+         select id, title, logo_url, store_app_id, description
          from games
          order by title
         ",
@@ -40,7 +42,7 @@ pub async fn filter_games_by_title(
 
     let games = sqlx::query_as::<_, Game>(
         "
-         select id, title, logo_url, store_app_id
+         select id, title, logo_url, store_app_id, description
          from games
          where lower(title) like '%' || ? || '%'
          order by title
@@ -76,7 +78,7 @@ pub async fn refresh_games(
 pub async fn get_game_by_id(state: State<'_, DbState>, id: u32) -> Result<Game, String> {
     let game = sqlx::query_as::<_, Game>(
         "
-         select id, title, logo_url, store_app_id
+         select id, title, logo_url, store_app_id, description
          from games
          where id = ?
          order by title
@@ -87,7 +89,45 @@ pub async fn get_game_by_id(state: State<'_, DbState>, id: u32) -> Result<Game, 
     .await
     .map_err(|e| e.to_string())?;
 
-    Ok(game)
+    if let Some(_) = game.description {
+        Ok(game)
+    } else {
+        let infos = get_game_info(game.store_app_id)
+            .await
+            .map_err(|e| e.to_string())?;
+
+        dbg!(&infos);
+
+        sqlx::query(
+            "
+        update games
+        set description = ?, img_hero = ?
+        where id = ?
+     
+",
+        )
+        .bind(infos.about_the_game)
+        .bind(infos.header_image)
+        .bind(id)
+        .execute(&state.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+        let updated_games = sqlx::query_as::<_, Game>(
+            "
+         select id, title, logo_url, store_app_id, description
+         from games
+         where id = ?
+         order by title
+        ",
+        )
+        .bind(id)
+        .fetch_one(&state.pool)
+        .await
+        .map_err(|e| e.to_string())?;
+
+        Ok(updated_games)
+    }
 }
 
 async fn delete_games(pool: &Pool<Sqlite>) -> Result<(), String> {

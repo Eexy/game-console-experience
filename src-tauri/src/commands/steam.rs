@@ -83,60 +83,25 @@ pub async fn get_steam_games(
         return Ok(());
     }
 
-    let tasks: Vec<_> = api_response
+    let placeholders = api_response
         .response
         .games
-        .into_iter()
-        .map(|mut item| {
-            tauri::async_runtime::spawn(async move {
-                let res = get_game_info(item.appid).await.map_err(|e| e.to_string())?;
-                item.img_hero = Some(res.header_image);
-                item.description = Some(res.about_the_game);
-                Ok::<_, String>(item)
-            })
-        })
-        .collect();
-
-    let results = futures::future::join_all(tasks).await;
-
-    let games: Vec<_> = results
-        .into_iter()
-        .filter_map(|item| match item {
-            Ok(Ok(game)) => Some(game),
-            Ok(Err(e)) => {
-                eprintln!("Error fetching game info: {}", e);
-                None
-            }
-            Err(e) => {
-                eprintln!("Task join error: {}", e);
-                None
-            }
-        })
-        .collect();
-
-    if games.is_empty() {
-        return Ok(());
-    }
-
-    let placeholders = games
         .iter()
-        .map(|_| "(?, ?, ?, ?, ?)")
+        .map(|_| "(?, ?, ? )")
         .collect::<Vec<_>>()
         .join(", ");
 
     let query_str = format!(
-        "insert into games (title, logo_url, description, img_hero, store_app_id) values {}",
+        "insert into games (title, logo_url, store_app_id) values {}",
         placeholders
     );
 
     let mut query = sqlx::query(&query_str);
 
-    for game in &games {
+    for game in &api_response.response.games {
         query = query
             .bind(&game.name)
             .bind(&game.img_icon_url)
-            .bind(&game.description)
-            .bind(&game.img_hero)
             .bind(game.appid);
     }
 
@@ -160,14 +125,14 @@ pub enum RequiredAge {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SteamGameInfo {
-    name: String,
-    steam_appid: u32,
-    required_age: RequiredAge,
-    is_free: bool,
-    about_the_game: String,
-    header_image: String,
-    capsule_image: String,
-    genres: Vec<SteamGameGenre>,
+    pub name: String,
+    pub steam_appid: u32,
+    pub required_age: RequiredAge,
+    pub is_free: bool,
+    pub about_the_game: String,
+    pub header_image: String,
+    pub capsule_image: String,
+    pub genres: Vec<SteamGameGenre>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
