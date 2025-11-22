@@ -2,7 +2,7 @@
     <div class="flex flex-col gap-2 p-2">
         <template v-if="game">
             <h1 class="font-bold text-xl">{{ game.title }}</h1>
-            <p>{{ game.description }}</p>
+            <p v-html="game.description"></p>
         </template>
     </div>
 </template>
