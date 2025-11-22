@@ -12,11 +12,11 @@ pub fn run() {
             let handle = app.handle();
 
             tauri::async_runtime::block_on(async {
-                let pool = db::create_db_pool(&handle)
+                let pool = db::create_db_pool(handle)
                     .await
                     .expect("failed to initialize db pool");
 
-                app.manage(DbState { pool: pool });
+                app.manage(DbState { pool });
             });
 
             app.manage(SteamState::new());

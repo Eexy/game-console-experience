@@ -1,4 +1,3 @@
-use futures::TryFutureExt;
 use serde::Serialize;
 use sqlx::{Pool, Sqlite};
 use tauri::State;
@@ -89,7 +88,7 @@ pub async fn get_game_by_id(state: State<'_, DbState>, id: u32) -> Result<Game, 
     .await
     .map_err(|e| e.to_string())?;
 
-    if let Some(_) = game.description {
+    if game.description.is_some() {
         Ok(game)
     } else {
         let infos = get_game_info(game.store_app_id)
