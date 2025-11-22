@@ -1,9 +1,8 @@
-use tauri::Manager;
-
-use crate::{commands::SteamState, db::DbState};
-
 mod commands;
 mod db;
+mod steam;
+
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -16,10 +15,10 @@ pub fn run() {
                     .await
                     .expect("failed to initialize db pool");
 
-                app.manage(DbState { pool });
+                app.manage(db::DbState { pool });
             });
 
-            app.manage(SteamState::new());
+            app.manage(steam::SteamState::new());
 
             Ok(())
         })

@@ -1,11 +1,8 @@
-use std::path::PathBuf;
-use std::{collections::HashMap, fs, path::Path};
+use std::{collections::HashMap, fs};
 
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Sqlite};
 use tauri_plugin_http::reqwest;
-use tauri_plugin_opener::OpenerExt;
-use windows_registry::LOCAL_MACHINE;
 
 #[derive(Debug)]
 pub struct SteamState {
@@ -170,89 +167,4 @@ pub async fn get_game_info(game_id: u32) -> Result<SteamGameInfo, String> {
         }
         None => Err("unable to get game info".to_string()),
     }
-}
-
-#[tauri::command]
-pub async fn is_game_installed(game_id: u32) -> bool {
-    let mut raw_steam_path = get_steam_path().expect("unable to get steam path");
-    raw_steam_path.push("steamapps");
-    raw_steam_path.push(format!("appmanifest_{}.acf", game_id));
-
-    let steam_path = raw_steam_path.to_str().expect("unable to get steam path");
-
-    let path = Path::new(&steam_path);
-
-    path.exists()
-}
-
-#[tauri::command]
-pub async fn launch_game(app: tauri::AppHandle, game_id: u32) -> Result<bool, String> {
-    let steam_url = format!("steam://install/{}/", game_id,);
-
-    let res = app.opener().open_url(steam_url, None::<&str>);
-
-    match res {
-        Ok(_) => Ok(true),
-        Err(_) => Err("unable to launch_game".to_string()),
-    }
-}
-
-#[tauri::command]
-pub async fn install_game(app: tauri::AppHandle, game_id: u32) -> Result<bool, String> {
-    let steam_url = format!("steam://run/{}/", game_id,);
-
-    let res = app.opener().open_url(steam_url, None::<&str>);
-
-    match res {
-        Ok(_) => Ok(true),
-        Err(_) => Err("unable to launch_game".to_string()),
-    }
-}
-
-#[tauri::command]
-pub fn filter_games(games: Vec<SteamOwnedGame>, search: String) -> Vec<SteamOwnedGame> {
-    let filtered: Vec<SteamOwnedGame> = games
-        .into_iter()
-        .filter(|game| game.name.to_lowercase().contains(&search.to_lowercase()))
-        .collect();
-
-    sort_game(filtered)
-}
-
-fn sort_game(mut games: Vec<SteamOwnedGame>) -> Vec<SteamOwnedGame> {
-    games.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
-    games
-}
-
-fn get_steam_path() -> Option<PathBuf> {
-    #[cfg(windows)]
-    {
-        get_steam_path_windows()
-    }
-
-    #[cfg(not(windows))]
-    {
-        None
-    }
-}
-
-#[cfg(target_os = "windows")]
-fn get_steam_path_windows() -> Option<PathBuf> {
-    //  LOCAL_MACHINE
-    if let Ok(install_path) = LOCAL_MACHINE
-        .open(r"SOFTWARE\WOW6432Node\Valve\Steam")
-        .and_then(|key| key.get_string("InstallPath"))
-    {
-        return Some(PathBuf::from(install_path));
-    }
-
-    //  CURRENT_USER
-    if let Ok(install_path) = LOCAL_MACHINE
-        .open(r"Software\Valve\Steam")
-        .and_then(|key| key.get_string("SteamPath"))
-    {
-        return Some(PathBuf::from(install_path));
-    }
-
-    None
 }

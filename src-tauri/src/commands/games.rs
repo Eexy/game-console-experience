@@ -2,10 +2,8 @@ use serde::Serialize;
 use sqlx::{Pool, Sqlite};
 use tauri::State;
 
-use crate::{
-    commands::{get_game_info, get_steam_games, SteamState},
-    db::DbState,
-};
+use crate::db::DbState;
+use crate::steam::{get_game_info, get_steam_games, SteamState};
 
 #[derive(sqlx::FromRow, Serialize)]
 pub struct Game {
