@@ -14,6 +14,7 @@ pub struct Game {
     description: Option<String>,
 }
 
+/// Get games from local db
 #[tauri::command]
 pub async fn get_games(db_state: State<'_, DbState>) -> Result<Vec<Game>, String> {
     let games = sqlx::query_as::<_, Game>(
@@ -30,6 +31,7 @@ pub async fn get_games(db_state: State<'_, DbState>) -> Result<Vec<Game>, String
     Ok(games)
 }
 
+/// Filter games by title
 #[tauri::command]
 pub async fn filter_games_by_title(
     db_state: State<'_, DbState>,
@@ -53,6 +55,8 @@ pub async fn filter_games_by_title(
     Ok(games)
 }
 
+/// Refresh games list by deleting all saved games in db, get games from steam and then info from
+/// IGDB
 #[tauri::command]
 pub async fn refresh_games(
     state: State<'_, DbState>,
@@ -71,6 +75,7 @@ pub async fn refresh_games(
     Ok(())
 }
 
+/// Get game by id with extra info like description, artwork...
 #[tauri::command]
 pub async fn get_game_by_id(state: State<'_, DbState>, id: u32) -> Result<Game, String> {
     let game = sqlx::query_as::<_, Game>(
@@ -92,8 +97,6 @@ pub async fn get_game_by_id(state: State<'_, DbState>, id: u32) -> Result<Game, 
         let infos = get_game_info(game.store_app_id)
             .await
             .map_err(|e| e.to_string())?;
-
-        dbg!(&infos);
 
         sqlx::query(
             "
@@ -127,6 +130,7 @@ pub async fn get_game_by_id(state: State<'_, DbState>, id: u32) -> Result<Game, 
     }
 }
 
+/// Delete all games from db
 async fn delete_games(pool: &Pool<Sqlite>) -> Result<(), String> {
     sqlx::query("delete from games")
         .execute(pool)
